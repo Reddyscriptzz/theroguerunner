@@ -112,7 +112,7 @@ const Index = () => {
             <Button 
               size="lg" 
               className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white px-8 py-4 text-lg font-medium rounded-lg shadow-lg hover:shadow-cyan-500/25 transition-all duration-300 group"
-              onClick={() => window.open('https://t.me/your_bot_username', '_blank')}
+              onClick={() => window.open('https://t.me/RogueRunnerAiBot', '_blank')}
             >
               Launch Bot
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
