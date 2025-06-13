@@ -3,7 +3,6 @@ import { TrendingUp, Users, DollarSign, Activity, Monitor, Wifi } from 'lucide-r
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import PerformanceMetrics from './PerformanceMetrics';
-import MarketIndicators from './MarketIndicators';
 
 const LiveDashboard = () => {
   const { stats, getTimeUntilNextUserIncrease } = useDashboardStats();
@@ -43,9 +42,6 @@ const LiveDashboard = () => {
             Real-time statistics from our trading network
           </p>
         </div>
-
-        {/* Market Indicators */}
-        <MarketIndicators />
 
         {/* Performance Metrics */}
         <PerformanceMetrics />

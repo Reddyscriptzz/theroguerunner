@@ -1,11 +1,12 @@
 
 import { useState } from 'react';
-import { Star, MessageSquare, User } from 'lucide-react';
+import { Star, MessageSquare, User, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface Testimonial {
   id: string;
@@ -13,6 +14,9 @@ interface Testimonial {
   comment: string;
   rating: number;
   date: string;
+  transactionAmount?: number;
+  profitEarned?: number;
+  transactionDate?: string;
 }
 
 const TestimonialSection = () => {
@@ -22,7 +26,10 @@ const TestimonialSection = () => {
       username: '@crypto_trader_99',
       comment: 'Incredible returns! Made over $5,000 in my first month. The bot works flawlessly and the support team is amazing.',
       rating: 5,
-      date: '2024-06-10'
+      date: '2024-06-10',
+      transactionAmount: 1000,
+      profitEarned: 5000,
+      transactionDate: '2024-05-15'
     },
     {
       id: '2',
@@ -43,10 +50,14 @@ const TestimonialSection = () => {
   const [newTestimonial, setNewTestimonial] = useState({
     username: '',
     comment: '',
-    rating: 5
+    rating: 5,
+    transactionAmount: '',
+    profitEarned: '',
+    transactionDate: ''
   });
 
   const [showForm, setShowForm] = useState(false);
+  const [includeTransactionDetails, setIncludeTransactionDetails] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,8 +70,15 @@ const TestimonialSection = () => {
         date: new Date().toISOString().split('T')[0]
       };
       
+      if (includeTransactionDetails) {
+        if (newTestimonial.transactionAmount) testimonial.transactionAmount = parseFloat(newTestimonial.transactionAmount);
+        if (newTestimonial.profitEarned) testimonial.profitEarned = parseFloat(newTestimonial.profitEarned);
+        if (newTestimonial.transactionDate) testimonial.transactionDate = newTestimonial.transactionDate;
+      }
+      
       setTestimonials([testimonial, ...testimonials]);
-      setNewTestimonial({ username: '', comment: '', rating: 5 });
+      setNewTestimonial({ username: '', comment: '', rating: 5, transactionAmount: '', profitEarned: '', transactionDate: '' });
+      setIncludeTransactionDetails(false);
       setShowForm(false);
     }
   };
@@ -168,6 +186,66 @@ const TestimonialSection = () => {
                     ))}
                   </div>
                 </div>
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="includeTransaction"
+                    checked={includeTransactionDetails}
+                    onCheckedChange={(checked) => setIncludeTransactionDetails(!!checked)}
+                  />
+                  <Label htmlFor="includeTransaction" className="text-cyan-400 font-exo text-sm">
+                    Include transaction details (optional)
+                  </Label>
+                </div>
+
+                {includeTransactionDetails && (
+                  <div className="space-y-4 p-4 bg-gray-800/50 rounded-lg border border-cyan-500/30">
+                    <p className="text-cyan-400 text-sm font-exo">Share your trading success (all fields optional)</p>
+                    
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="transactionAmount" className="text-white font-exo text-sm">
+                          Initial Investment ($)
+                        </Label>
+                        <Input
+                          id="transactionAmount"
+                          type="number"
+                          value={newTestimonial.transactionAmount}
+                          onChange={(e) => setNewTestimonial({...newTestimonial, transactionAmount: e.target.value})}
+                          placeholder="1000"
+                          className="bg-gray-700 border-gray-600 text-white font-space-mono"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="profitEarned" className="text-white font-exo text-sm">
+                          Profit Earned ($)
+                        </Label>
+                        <Input
+                          id="profitEarned"
+                          type="number"
+                          value={newTestimonial.profitEarned}
+                          onChange={(e) => setNewTestimonial({...newTestimonial, profitEarned: e.target.value})}
+                          placeholder="2500"
+                          className="bg-gray-700 border-gray-600 text-white font-space-mono"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="transactionDate" className="text-white font-exo text-sm">
+                        Transaction Date
+                      </Label>
+                      <Input
+                        id="transactionDate"
+                        type="date"
+                        value={newTestimonial.transactionDate}
+                        onChange={(e) => setNewTestimonial({...newTestimonial, transactionDate: e.target.value})}
+                        className="bg-gray-700 border-gray-600 text-white font-space-mono"
+                      />
+                    </div>
+                  </div>
+                )}
                 
                 <div className="flex space-x-4">
                   <Button
@@ -217,9 +295,38 @@ const TestimonialSection = () => {
                     </div>
                   </div>
                 </div>
-                <p className="text-gray-300 font-exo leading-relaxed">
+                
+                <p className="text-gray-300 font-exo leading-relaxed mb-4">
                   "{testimonial.comment}"
                 </p>
+
+                {(testimonial.transactionAmount || testimonial.profitEarned) && (
+                  <div className="border-t border-gray-700 pt-3 mt-3">
+                    <div className="flex items-center text-green-400 text-xs font-exo mb-2">
+                      <DollarSign className="h-3 w-3 mr-1" />
+                      <span>Verified Transaction</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      {testimonial.transactionAmount && (
+                        <div>
+                          <span className="text-gray-400">Invested: </span>
+                          <span className="text-white font-space-mono">${testimonial.transactionAmount}</span>
+                        </div>
+                      )}
+                      {testimonial.profitEarned && (
+                        <div>
+                          <span className="text-gray-400">Earned: </span>
+                          <span className="text-green-400 font-space-mono">${testimonial.profitEarned}</span>
+                        </div>
+                      )}
+                    </div>
+                    {testimonial.transactionDate && (
+                      <div className="text-xs text-gray-500 mt-1">
+                        Date: {new Date(testimonial.transactionDate).toLocaleDateString()}
+                      </div>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}
