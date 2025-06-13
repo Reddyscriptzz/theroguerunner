@@ -1,12 +1,13 @@
 
 import { useState } from 'react';
-import { Star, MessageSquare, User, DollarSign } from 'lucide-react';
+import { Star, MessageSquare, User, DollarSign, Link2, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Testimonial {
   id: string;
@@ -17,6 +18,8 @@ interface Testimonial {
   transactionAmount?: number;
   profitEarned?: number;
   transactionDate?: string;
+  blockchainTxId?: string;
+  blockchainChain?: string;
 }
 
 const TestimonialSection = () => {
@@ -29,7 +32,9 @@ const TestimonialSection = () => {
       date: '2024-06-10',
       transactionAmount: 1000,
       profitEarned: 5000,
-      transactionDate: '2024-05-15'
+      transactionDate: '2024-05-15',
+      blockchainTxId: '0x742d35Cc6634C0532925a3b8D2c1d1c5b8A6A8B',
+      blockchainChain: 'ethereum'
     },
     {
       id: '2',
@@ -53,11 +58,24 @@ const TestimonialSection = () => {
     rating: 5,
     transactionAmount: '',
     profitEarned: '',
-    transactionDate: ''
+    transactionDate: '',
+    blockchainTxId: '',
+    blockchainChain: ''
   });
 
   const [showForm, setShowForm] = useState(false);
   const [includeTransactionDetails, setIncludeTransactionDetails] = useState(false);
+
+  const blockchainChains = [
+    { value: 'ethereum', label: 'Ethereum (ETH)' },
+    { value: 'bitcoin', label: 'Bitcoin (BTC)' },
+    { value: 'binance', label: 'Binance Smart Chain (BSC)' },
+    { value: 'polygon', label: 'Polygon (MATIC)' },
+    { value: 'solana', label: 'Solana (SOL)' },
+    { value: 'avalanche', label: 'Avalanche (AVAX)' },
+    { value: 'cardano', label: 'Cardano (ADA)' },
+    { value: 'other', label: 'Other' }
+  ];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,10 +92,12 @@ const TestimonialSection = () => {
         if (newTestimonial.transactionAmount) testimonial.transactionAmount = parseFloat(newTestimonial.transactionAmount);
         if (newTestimonial.profitEarned) testimonial.profitEarned = parseFloat(newTestimonial.profitEarned);
         if (newTestimonial.transactionDate) testimonial.transactionDate = newTestimonial.transactionDate;
+        if (newTestimonial.blockchainTxId) testimonial.blockchainTxId = newTestimonial.blockchainTxId;
+        if (newTestimonial.blockchainChain) testimonial.blockchainChain = newTestimonial.blockchainChain;
       }
       
       setTestimonials([testimonial, ...testimonials]);
-      setNewTestimonial({ username: '', comment: '', rating: 5, transactionAmount: '', profitEarned: '', transactionDate: '' });
+      setNewTestimonial({ username: '', comment: '', rating: 5, transactionAmount: '', profitEarned: '', transactionDate: '', blockchainTxId: '', blockchainChain: '' });
       setIncludeTransactionDetails(false);
       setShowForm(false);
     }
@@ -93,6 +113,16 @@ const TestimonialSection = () => {
   };
 
   const averageRating = testimonials.reduce((sum, t) => sum + t.rating, 0) / testimonials.length;
+
+  const getChainLabel = (chainValue: string) => {
+    const chain = blockchainChains.find(c => c.value === chainValue);
+    return chain ? chain.label : chainValue;
+  };
+
+  const truncateTxId = (txId: string) => {
+    if (txId.length <= 16) return txId;
+    return `${txId.substring(0, 8)}...${txId.substring(txId.length - 8)}`;
+  };
 
   return (
     <section id="testimonials" className="py-16 px-6 relative z-10">
@@ -244,6 +274,43 @@ const TestimonialSection = () => {
                         className="bg-gray-700 border-gray-600 text-white font-space-mono"
                       />
                     </div>
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="blockchainChain" className="text-white font-exo text-sm">
+                          Blockchain Chain
+                        </Label>
+                        <Select
+                          value={newTestimonial.blockchainChain}
+                          onValueChange={(value) => setNewTestimonial({...newTestimonial, blockchainChain: value})}
+                        >
+                          <SelectTrigger className="bg-gray-700 border-gray-600 text-white font-space-mono">
+                            <SelectValue placeholder="Select chain" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-gray-800 border-gray-600">
+                            {blockchainChains.map((chain) => (
+                              <SelectItem key={chain.value} value={chain.value} className="text-white hover:bg-gray-700">
+                                {chain.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="blockchainTxId" className="text-white font-exo text-sm">
+                          Transaction ID
+                        </Label>
+                        <Input
+                          id="blockchainTxId"
+                          type="text"
+                          value={newTestimonial.blockchainTxId}
+                          onChange={(e) => setNewTestimonial({...newTestimonial, blockchainTxId: e.target.value})}
+                          placeholder="0x742d35Cc6634C0532925a..."
+                          className="bg-gray-700 border-gray-600 text-white font-space-mono text-xs"
+                        />
+                      </div>
+                    </div>
                   </div>
                 )}
                 
@@ -300,13 +367,13 @@ const TestimonialSection = () => {
                   "{testimonial.comment}"
                 </p>
 
-                {(testimonial.transactionAmount || testimonial.profitEarned) && (
+                {(testimonial.transactionAmount || testimonial.profitEarned || testimonial.blockchainTxId) && (
                   <div className="border-t border-gray-700 pt-3 mt-3">
                     <div className="flex items-center text-green-400 text-xs font-exo mb-2">
                       <DollarSign className="h-3 w-3 mr-1" />
                       <span>Verified Transaction</span>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="grid grid-cols-2 gap-2 text-xs mb-2">
                       {testimonial.transactionAmount && (
                         <div>
                           <span className="text-gray-400">Invested: </span>
@@ -321,8 +388,28 @@ const TestimonialSection = () => {
                       )}
                     </div>
                     {testimonial.transactionDate && (
-                      <div className="text-xs text-gray-500 mt-1">
+                      <div className="text-xs text-gray-500 mb-2">
                         Date: {new Date(testimonial.transactionDate).toLocaleDateString()}
+                      </div>
+                    )}
+                    {testimonial.blockchainTxId && (
+                      <div className="space-y-1">
+                        {testimonial.blockchainChain && (
+                          <div className="flex items-center text-xs">
+                            <Zap className="h-3 w-3 mr-1 text-cyan-400" />
+                            <span className="text-gray-400">Chain: </span>
+                            <span className="text-cyan-400 font-space-mono ml-1">
+                              {getChainLabel(testimonial.blockchainChain)}
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex items-center text-xs">
+                          <Link2 className="h-3 w-3 mr-1 text-cyan-400" />
+                          <span className="text-gray-400">TX: </span>
+                          <span className="text-cyan-400 font-space-mono ml-1 break-all">
+                            {truncateTxId(testimonial.blockchainTxId)}
+                          </span>
+                        </div>
                       </div>
                     )}
                   </div>
