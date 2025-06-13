@@ -10,6 +10,7 @@ interface DashboardStats {
   lastUserIncrease: number;
   lastProfitIncrease: number;
   lastTradeIncrease: number;
+  nextUserIncrease: number;
 }
 
 const STORAGE_KEY = 'dashboard_stats';
@@ -37,6 +38,7 @@ const getInitialStats = (): DashboardStats => {
     lastUserIncrease: now,
     lastProfitIncrease: now,
     lastTradeIncrease: now,
+    nextUserIncrease: Math.floor(Math.random() * 14) + 2, // 2-15
   };
 };
 
@@ -53,11 +55,11 @@ export const useDashboardStats = () => {
     const currentStats = { ...stats };
     let hasChanges = false;
 
-    // Update active users (2-10 every 30 minutes)
+    // Update active users (2-15 every 30 minutes)
     if (now - currentStats.lastUserIncrease >= USER_INTERVAL) {
-      const newUsers = Math.floor(Math.random() * 9) + 2; // 2-10 users
-      currentStats.activeUsers += newUsers;
-      currentStats.totalProfits += newUsers * 30; // $30 per new user
+      currentStats.activeUsers += currentStats.nextUserIncrease;
+      currentStats.totalProfits += currentStats.nextUserIncrease * 30; // $30 per new user
+      currentStats.nextUserIncrease = Math.floor(Math.random() * 14) + 2; // 2-15 users
       currentStats.lastUserIncrease = now;
       hasChanges = true;
     }
@@ -77,9 +79,10 @@ export const useDashboardStats = () => {
       hasChanges = true;
     }
 
-    // Update success rate (minor fluctuations)
+    // Update success rate (slower, more normalized fluctuations)
     const baseSuccessRate = 91.5;
-    currentStats.successRate = baseSuccessRate + (Math.random() * 3 - 1.5); // ±1.5%
+    const slowFluctuation = Math.sin(now / 300000) * 0.5; // Very slow sine wave
+    currentStats.successRate = baseSuccessRate + slowFluctuation + (Math.random() * 0.4 - 0.2); // ±0.2%
 
     currentStats.lastUpdate = now;
 

@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import PerformanceMetrics from './PerformanceMetrics';
 import MarketIndicators from './MarketIndicators';
-import UserActivityFeed from './UserActivityFeed';
 
 const LiveDashboard = () => {
   const { stats, getTimeUntilNextUserIncrease } = useDashboardStats();
@@ -28,9 +27,9 @@ const LiveDashboard = () => {
     return `${minutes}m`;
   };
 
-  // Calculate current new users for display
+  // Calculate display for next user increase
   const nextUserIncrease = getTimeUntilNextUserIncrease();
-  const newUsersDisplay = nextUserIncrease < 300000 ? Math.floor(Math.random() * 9) + 2 : 0; // Show if within 5 minutes
+  const showNextIncrease = nextUserIncrease < 300000; // Show if within 5 minutes
 
   return (
     <section className="py-16 px-6 relative z-10">
@@ -65,7 +64,7 @@ const LiveDashboard = () => {
                 {formatNumber(stats.activeUsers)}
               </div>
               <div className="text-xs text-green-400 font-exo">
-                {newUsersDisplay > 0 ? `+${newUsersDisplay} joining` : `Next: ${formatTimeUntilNext(nextUserIncrease)}`}
+                {showNextIncrease ? `+${stats.nextUserIncrease} joining` : `+${stats.nextUserIncrease}`}
               </div>
             </CardContent>
           </Card>
@@ -81,7 +80,7 @@ const LiveDashboard = () => {
               <div className="text-3xl font-bold text-white font-space-mono">
                 {formatProfits(stats.totalProfits)}
               </div>
-              <div className="text-xs text-green-400 font-exo">+0.2-0.3% every 2hrs</div>
+              <div className="text-xs text-green-400 font-exo">+3% daily</div>
             </CardContent>
           </Card>
 
@@ -96,7 +95,7 @@ const LiveDashboard = () => {
               <div className="text-3xl font-bold text-white font-space-mono">
                 {formatNumber(stats.tradesExecuted)}
               </div>
-              <div className="text-xs text-blue-400 font-exo">+1 every 3hrs</div>
+              <div className="text-xs text-blue-400 font-exo">active trading</div>
             </CardContent>
           </Card>
 
@@ -115,9 +114,6 @@ const LiveDashboard = () => {
             </CardContent>
           </Card>
         </div>
-
-        {/* Activity Feed */}
-        <UserActivityFeed />
 
         {/* Network Status */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">

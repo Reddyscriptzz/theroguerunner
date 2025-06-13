@@ -15,7 +15,6 @@ interface MarketData {
 export const useMarketData = () => {
   const [marketData, setMarketData] = useState<MarketData>({
     pairs: [
-      { symbol: 'BTC/USDT', price: 43250.75, change24h: 2.45, volume: 1250000 },
       { symbol: 'ETH/USDT', price: 2680.30, change24h: -1.23, volume: 890000 },
       { symbol: 'BNB/USDT', price: 315.45, change24h: 0.89, volume: 420000 },
       { symbol: 'SOL/USDT', price: 98.75, change24h: 4.12, volume: 320000 },
