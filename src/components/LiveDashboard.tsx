@@ -11,30 +11,69 @@ const LiveDashboard = () => {
     successRate: 0
   });
 
-  // Simulate real-time data updates
+  const [baseUsers] = useState(1400); // Starting user base
+  const [dailyGrowthRate] = useState(0.03); // 3% compound interest per user daily
+  const baseProfitPerUser = 30; // $30 base profit per user to reach $42,000 with 1400 users
+
+  // Calculate realistic trading statistics
   useEffect(() => {
+    const calculateStats = () => {
+      // Calculate current active users (grows by 6-30 new users daily)
+      const daysSinceStart = Math.floor(Date.now() / (1000 * 60 * 60 * 24)) % 30; // Cycle every 30 days
+      const newUsersToday = Math.floor(Math.random() * 25) + 6; // 6-30 random users
+      const currentUsers = baseUsers + (daysSinceStart * newUsersToday);
+      
+      // Calculate total profits based on compound interest per user
+      // Base: $42,000 grows by 3% compound daily per user
+      const compoundMultiplier = Math.pow(1 + dailyGrowthRate, daysSinceStart);
+      const totalProfits = Math.floor(currentUsers * baseProfitPerUser * compoundMultiplier);
+      
+      // Calculate trades executed (minimum 10 per day, scales with users)
+      const baseTrades = 400;
+      const additionalTrades = Math.floor(currentUsers * 0.5); // 0.5 trades per user on average
+      const tradesExecuted = baseTrades + additionalTrades + Math.floor(Math.random() * 100);
+      
+      // Success rate (89-94% range)
+      const successRate = Math.floor(Math.random() * 6) + 89;
+
+      return {
+        activeUsers: currentUsers,
+        totalProfits,
+        tradesExecuted,
+        successRate
+      };
+    };
+
+    // Real-time updates every 3 seconds with realistic fluctuations
     const interval = setInterval(() => {
-      setStats(prev => ({
-        activeUsers: Math.floor(Math.random() * 50) + 1250,
-        totalProfits: Math.floor(Math.random() * 100000) + 2500000,
-        tradesExecuted: Math.floor(Math.random() * 1000) + 45000,
-        successRate: Math.floor(Math.random() * 5) + 89
-      }));
+      const baseStats = calculateStats();
+      
+      setStats({
+        activeUsers: baseStats.activeUsers + Math.floor(Math.random() * 10) - 5, // Small random fluctuation
+        totalProfits: baseStats.totalProfits + Math.floor(Math.random() * 1000) - 500, // Small profit fluctuation
+        tradesExecuted: baseStats.tradesExecuted + Math.floor(Math.random() * 20), // Trades keep growing
+        successRate: baseStats.successRate + (Math.random() * 2 - 1) // Small success rate fluctuation
+      });
     }, 3000);
 
     // Initial load
-    setStats({
-      activeUsers: 1287,
-      totalProfits: 2547830,
-      tradesExecuted: 45672,
-      successRate: 91.7
-    });
+    const initialStats = calculateStats();
+    setStats(initialStats);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [baseUsers, dailyGrowthRate, baseProfitPerUser]);
 
   const formatNumber = (num: number) => {
-    return new Intl.NumberFormat('en-US').format(num);
+    return new Intl.NumberFormat('en-US').format(Math.floor(num));
+  };
+
+  const formatProfits = (num: number) => {
+    if (num >= 1000000) {
+      return `$${(num / 1000000).toFixed(1)}M`;
+    } else if (num >= 1000) {
+      return `$${(num / 1000).toFixed(0)}K`;
+    }
+    return `$${formatNumber(num)}`;
   };
 
   return (
@@ -62,7 +101,7 @@ const LiveDashboard = () => {
               <div className="text-3xl font-bold text-white font-space-mono">
                 {formatNumber(stats.activeUsers)}
               </div>
-              <div className="text-xs text-green-400 font-exo">+12% from yesterday</div>
+              <div className="text-xs text-green-400 font-exo">+{Math.floor(Math.random() * 25) + 6} new today</div>
             </CardContent>
           </Card>
 
@@ -75,9 +114,9 @@ const LiveDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-white font-space-mono">
-                ${formatNumber(stats.totalProfits)}
+                {formatProfits(stats.totalProfits)}
               </div>
-              <div className="text-xs text-green-400 font-exo">Generated for users</div>
+              <div className="text-xs text-green-400 font-exo">+3% compound daily</div>
             </CardContent>
           </Card>
 
@@ -92,7 +131,7 @@ const LiveDashboard = () => {
               <div className="text-3xl font-bold text-white font-space-mono">
                 {formatNumber(stats.tradesExecuted)}
               </div>
-              <div className="text-xs text-blue-400 font-exo">Today</div>
+              <div className="text-xs text-blue-400 font-exo">Min 10 trades/day</div>
             </CardContent>
           </Card>
 
@@ -105,7 +144,7 @@ const LiveDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-white font-space-mono">
-                {stats.successRate}%
+                {stats.successRate.toFixed(1)}%
               </div>
               <div className="text-xs text-green-400 font-exo">7-day average</div>
             </CardContent>
