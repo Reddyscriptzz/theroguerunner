@@ -18,9 +18,9 @@ const LiveDashboard = () => {
   // Calculate realistic trading statistics
   useEffect(() => {
     const calculateStats = () => {
-      // Calculate current active users (grows by 6-30 new users daily)
+      // Calculate current active users (grows by 6-30 new users daily, capped at 30)
       const daysSinceStart = Math.floor(Date.now() / (1000 * 60 * 60 * 24)) % 30; // Cycle every 30 days
-      const newUsersToday = Math.floor(Math.random() * 25) + 6; // 6-30 random users
+      const newUsersToday = Math.min(Math.floor(Math.random() * 25) + 6, 30); // 6-30 random users, capped at 30
       const currentUsers = baseUsers + (daysSinceStart * newUsersToday);
       
       // Calculate total profits based on compound interest per user
@@ -28,10 +28,11 @@ const LiveDashboard = () => {
       const compoundMultiplier = Math.pow(1 + dailyGrowthRate, daysSinceStart);
       const totalProfits = Math.floor(currentUsers * baseProfitPerUser * compoundMultiplier);
       
-      // Calculate trades executed (minimum 10 per day, scales with users)
-      const baseTrades = 400;
-      const additionalTrades = Math.floor(currentUsers * 0.5); // 0.5 trades per user on average
-      const tradesExecuted = baseTrades + additionalTrades + Math.floor(Math.random() * 100);
+      // Calculate trades executed - 1 trade every 3 hours = 8 trades per day max, we'll use 10 max
+      const currentHour = new Date().getHours();
+      const tradesPerDay = Math.min(Math.floor(currentHour / 3) + 1, 10); // Max 10 trades per day
+      const baseTrades = daysSinceStart * 10; // 10 trades per day historical
+      const tradesExecuted = baseTrades + tradesPerDay;
       
       // Success rate (89-94% range)
       const successRate = Math.floor(Math.random() * 6) + 89;
@@ -40,7 +41,8 @@ const LiveDashboard = () => {
         activeUsers: currentUsers,
         totalProfits,
         tradesExecuted,
-        successRate
+        successRate,
+        newUsersToday
       };
     };
 
@@ -51,7 +53,7 @@ const LiveDashboard = () => {
       setStats({
         activeUsers: baseStats.activeUsers + Math.floor(Math.random() * 10) - 5, // Small random fluctuation
         totalProfits: baseStats.totalProfits + Math.floor(Math.random() * 1000) - 500, // Small profit fluctuation
-        tradesExecuted: baseStats.tradesExecuted + Math.floor(Math.random() * 20), // Trades keep growing
+        tradesExecuted: baseStats.tradesExecuted + Math.floor(Math.random() * 2), // Small trades fluctuation
         successRate: baseStats.successRate + (Math.random() * 2 - 1) // Small success rate fluctuation
       });
     }, 3000);
@@ -75,6 +77,9 @@ const LiveDashboard = () => {
     }
     return `$${formatNumber(num)}`;
   };
+
+  // Calculate new users for display (max 30)
+  const newUsersToday = Math.min(Math.floor(Math.random() * 25) + 6, 30);
 
   return (
     <section className="py-16 px-6 relative z-10">
@@ -101,7 +106,7 @@ const LiveDashboard = () => {
               <div className="text-3xl font-bold text-white font-space-mono">
                 {formatNumber(stats.activeUsers)}
               </div>
-              <div className="text-xs text-green-400 font-exo">+{Math.floor(Math.random() * 25) + 6} new today</div>
+              <div className="text-xs text-green-400 font-exo">+{newUsersToday} new today</div>
             </CardContent>
           </Card>
 
@@ -131,7 +136,7 @@ const LiveDashboard = () => {
               <div className="text-3xl font-bold text-white font-space-mono">
                 {formatNumber(stats.tradesExecuted)}
               </div>
-              <div className="text-xs text-blue-400 font-exo">Min 10 trades/day</div>
+              <div className="text-xs text-blue-400 font-exo">Every 3hrs (Max 10/day)</div>
             </CardContent>
           </Card>
 
