@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -99,5 +100,82 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Custom animations for the trading bot website */
+@layer utilities {
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes glitch {
+    0%, 100% {
+      transform: translate(0);
+    }
+    20% {
+      transform: translate(-2px, 2px);
+    }
+    40% {
+      transform: translate(-2px, -2px);
+    }
+    60% {
+      transform: translate(2px, 2px);
+    }
+    80% {
+      transform: translate(2px, -2px);
+    }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(6, 182, 212, 0.6);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 1s ease-out forwards;
+    opacity: 0;
+  }
+
+  .animate-glitch {
+    animation: glitch 0.5s infinite;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s infinite;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Custom scrollbar for webkit browsers */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #1a1a1a;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #06b6d4;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #0891b2;
   }
 }
