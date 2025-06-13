@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowRight, Bot, TrendingUp, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import Calculator from '@/components/Calculator';
 
 const Index = () => {
   const [loading, setLoading] = useState(true);
@@ -73,6 +74,7 @@ const Index = () => {
           </div>
           <nav className="space-x-6">
             <a href="#features" className="text-gray-300 hover:text-cyan-400 transition-colors">Features</a>
+            <a href="#calculator" className="text-gray-300 hover:text-cyan-400 transition-colors">Calculator</a>
             <a href="#about" className="text-gray-300 hover:text-cyan-400 transition-colors">About</a>
           </nav>
         </div>
@@ -139,6 +141,9 @@ const Index = () => {
           </div>
         </div>
       </main>
+
+      {/* Calculator Section */}
+      <Calculator />
 
       {/* Footer */}
       <footer className="relative z-10 py-8 border-t border-gray-800">
