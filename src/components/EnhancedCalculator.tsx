@@ -4,6 +4,7 @@ import { Calculator as CalculatorIcon, TrendingUp, DollarSign, Percent } from 'l
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
 
 interface CalculationResult {
   period: string;
@@ -20,19 +21,28 @@ interface CalculationResult {
 const EnhancedCalculator = () => {
   const [amount, setAmount] = useState<string>('100');
   const [results, setResults] = useState<CalculationResult[]>([]);
-  const feeRate = 0.09; // 9% fee on profits
+  const [isCompound, setIsCompound] = useState<boolean>(true);
+  const feeRate = 0.10; // 10% fee on profits
 
   const calculateProfits = (principal: number): CalculationResult[] => {
     const periods = [
       { period: '1 Day', days: 1 },
       { period: '7 Days', days: 7 },
       { period: '1 Month', days: 30 },
-      { period: '3 Months', days: 90 },
-      { period: '1 Year', days: 365 }
+      { period: '3 Months', days: 90 }
     ];
 
     return periods.map(({ period, days }) => {
-      const grossTotal = principal * Math.pow(1.03, days);
+      let grossTotal: number;
+      
+      if (isCompound) {
+        // Compound interest: 3% daily compounded
+        grossTotal = principal * Math.pow(1.03, days);
+      } else {
+        // Simple interest: 3% daily simple
+        grossTotal = principal * (1 + (0.03 * days));
+      }
+      
       const grossProfit = grossTotal - principal;
       const fees = grossProfit * feeRate;
       const netProfit = grossProfit - fees;
@@ -61,7 +71,7 @@ const EnhancedCalculator = () => {
     } else {
       setResults([]);
     }
-  }, [amount]);
+  }, [amount, isCompound]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -81,27 +91,47 @@ const EnhancedCalculator = () => {
             <h2 className="text-3xl font-bold text-white font-orbitron">Advanced Profit Calculator</h2>
           </div>
           <p className="text-gray-400 text-lg font-exo">
-            Calculate your potential profits with 3% daily returns (9% fee applies to all profits)
+            Calculate your potential profits with 3% daily returns (10% fee applies to all profits)
           </p>
         </div>
 
         <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-lg p-8 animate-pulse-glow mb-8">
-          <div className="mb-8">
-            <Label htmlFor="investment" className="text-white text-lg mb-2 block font-exo">
-              Investment Amount (USDT)
-            </Label>
-            <Input
-              id="investment"
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              min="30"
-              placeholder="Minimum 30 USDT"
-              className="text-lg h-12 bg-gray-800 border-gray-700 text-white focus:border-cyan-400 font-space-mono"
-            />
-            {amount && parseFloat(amount) < 30 && (
-              <p className="text-red-400 text-sm mt-2 font-exo">Minimum investment is 30 USDT</p>
-            )}
+          <div className="grid md:grid-cols-2 gap-8 mb-8">
+            <div>
+              <Label htmlFor="investment" className="text-white text-lg mb-2 block font-exo">
+                Investment Amount (USDT)
+              </Label>
+              <Input
+                id="investment"
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                min="30"
+                placeholder="Minimum 30 USDT"
+                className="text-lg h-12 bg-gray-800 border-gray-700 text-white focus:border-cyan-400 font-space-mono"
+              />
+              {amount && parseFloat(amount) < 30 && (
+                <p className="text-red-400 text-sm mt-2 font-exo">Minimum investment is 30 USDT</p>
+              )}
+            </div>
+            
+            <div className="flex flex-col justify-center">
+              <div className="flex items-center space-x-3">
+                <Label className="text-white font-exo">Simple Interest</Label>
+                <Switch
+                  checked={isCompound}
+                  onCheckedChange={setIsCompound}
+                  className="data-[state=checked]:bg-cyan-600"
+                />
+                <Label className="text-white font-exo">Compound Interest</Label>
+              </div>
+              <p className="text-gray-400 text-sm mt-2 font-exo">
+                {isCompound 
+                  ? "Profits are reinvested daily for compound growth" 
+                  : "Fixed 3% daily return on initial investment"
+                }
+              </p>
+            </div>
           </div>
 
           {isValidAmount && results.length > 0 && (
@@ -112,12 +142,12 @@ const EnhancedCalculator = () => {
                   <CardHeader className="pb-2">
                     <CardTitle className="text-cyan-400 text-sm font-exo flex items-center">
                       <DollarSign className="h-4 w-4 mr-2" />
-                      Total Fees (1 Year)
+                      Total Fees (3 Months)
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-red-400 font-space-mono">
-                      {formatCurrency(results[4]?.fees || 0)} USDT
+                      {formatCurrency(results[3]?.fees || 0)} USDT
                     </div>
                   </CardContent>
                 </Card>
@@ -126,12 +156,12 @@ const EnhancedCalculator = () => {
                   <CardHeader className="pb-2">
                     <CardTitle className="text-cyan-400 text-sm font-exo flex items-center">
                       <TrendingUp className="h-4 w-4 mr-2" />
-                      Net Profit (1 Year)
+                      Net Profit (3 Months)
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-green-400 font-space-mono">
-                      {formatCurrency(results[4]?.netProfit || 0)} USDT
+                      {formatCurrency(results[3]?.netProfit || 0)} USDT
                     </div>
                   </CardContent>
                 </Card>
@@ -140,19 +170,19 @@ const EnhancedCalculator = () => {
                   <CardHeader className="pb-2">
                     <CardTitle className="text-cyan-400 text-sm font-exo flex items-center">
                       <Percent className="h-4 w-4 mr-2" />
-                      Annualized ROI
+                      ROI (3 Months)
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-cyan-400 font-space-mono">
-                      {results[4]?.annualizedROI.toFixed(1) || 0}%
+                      {results[3]?.roi.toFixed(1) || 0}%
                     </div>
                   </CardContent>
                 </Card>
               </div>
 
               {/* Detailed Results */}
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {results.map((result, index) => (
                   <div
                     key={result.period}
@@ -172,7 +202,7 @@ const EnhancedCalculator = () => {
                         <span className="text-blue-400 font-space-mono">+{formatCurrency(result.grossProfit)} USDT</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Fees (9%):</span>
+                        <span className="text-gray-400">Fees (10%):</span>
                         <span className="text-red-400 font-space-mono">-{formatCurrency(result.fees)} USDT</span>
                       </div>
                       <div className="flex justify-between">
@@ -185,7 +215,7 @@ const EnhancedCalculator = () => {
                       </div>
                       <div className="text-center">
                         <span className="text-xs text-gray-500 font-exo">
-                          ROI: {result.roi.toFixed(1)}% | Annualized: {result.annualizedROI.toFixed(1)}%
+                          ROI: {result.roi.toFixed(1)}%
                         </span>
                       </div>
                     </div>
@@ -204,7 +234,7 @@ const EnhancedCalculator = () => {
 
         <div className="text-center">
           <p className="text-gray-500 text-sm font-exo">
-            * Calculations based on 3% daily compound returns with 9% fee on profits. Trading involves risk.
+            * Calculations based on 3% daily returns with 10% fee on profits. Trading involves risk.
           </p>
         </div>
       </div>

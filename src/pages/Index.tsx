@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { ArrowRight, Bot, TrendingUp, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import EnhancedCalculator from '@/components/EnhancedCalculator';
 import SecuritySection from '@/components/SecuritySection';
 import LiveDashboard from '@/components/LiveDashboard';
+import TestimonialSection from '@/components/TestimonialSection';
 
 const Index = () => {
   const [loading, setLoading] = useState(true);
@@ -77,6 +77,7 @@ const Index = () => {
           <nav className="space-x-6 font-exo">
             <a href="#features" className="text-gray-300 hover:text-cyan-400 transition-colors">Features</a>
             <a href="#calculator" className="text-gray-300 hover:text-cyan-400 transition-colors">Calculator</a>
+            <a href="#testimonials" className="text-gray-300 hover:text-cyan-400 transition-colors">Reviews</a>
             <a href="#security" className="text-gray-300 hover:text-cyan-400 transition-colors">Security</a>
             <a href="#dashboard" className="text-gray-300 hover:text-cyan-400 transition-colors">Dashboard</a>
           </nav>
@@ -152,6 +153,11 @@ const Index = () => {
 
       {/* Enhanced Calculator Section */}
       <EnhancedCalculator />
+
+      {/* Testimonial Section */}
+      <div id="testimonials">
+        <TestimonialSection />
+      </div>
 
       {/* Security Section */}
       <SecuritySection />
